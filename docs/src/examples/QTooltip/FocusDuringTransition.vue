@@ -16,7 +16,13 @@
         Press Enter to request input focus
       </q-tooltip>
     </button>
-    <q-input ref="input" class="q-mt-md" outlined label="Target input" />
+    <q-input
+      ref="input"
+      v-model="inputValue"
+      class="q-mt-md"
+      outlined
+      label="Target input"
+    />
     <div class="q-mt-sm" role="status">
       Completed transitions: {{ showCount }} show, {{ hideCount }} hide
     </div>
@@ -27,6 +33,7 @@
 import { ref, useTemplateRef } from 'vue'
 
 const input = useTemplateRef('input')
+const inputValue = ref('')
 const showCount = ref(0)
 const hideCount = ref(0)
 </script>
