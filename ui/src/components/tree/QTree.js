@@ -1190,28 +1190,33 @@ export default /*#__PURE__*/ createComponent({
       )
 
       function hide() {
-        hidden.value = true
+        // A removed container can finish leaving after the node reopens.
+        hidden.value = !expanded.value
       }
 
       function slide() {
         if (elRef.value !== null) onEnter(elRef.value)
       }
 
-      watch(expanded, val => {
-        if (props.noTransition) {
-          hidden.value = !val
-        } else if (!val) {
-          if (elRef.value !== null) onLeave(elRef.value, hide)
-          else hide()
-        } else if (hidden.value) {
-          // shown once Vue has dropped the display: none
-          hidden.value = false
-          nextTick(slide)
-        } else {
-          // reopened while still sliding shut
-          slide()
-        }
-      })
+      watch(
+        expanded,
+        val => {
+          if (props.noTransition) {
+            hidden.value = !val
+          } else if (!val) {
+            if (elRef.value !== null) onLeave(elRef.value, hide)
+            else hide()
+          } else if (hidden.value) {
+            // shown once Vue has dropped the display: none
+            hidden.value = false
+            nextTick(slide)
+          } else {
+            // reopened while still sliding shut
+            slide()
+          }
+        },
+        { flush: 'post' }
+      )
 
       return { elRef, hidden }
     }

@@ -1518,6 +1518,91 @@ describe('[QTree API]', () => {
   })
 
   describe('[Generic]', () => {
+    test.each([false, true])(
+      'keeps restored children visible when already collapsing: %s',
+      async collapsing => {
+        vi.useFakeTimers()
+        const wrapper = mountTree({
+          expanded: ['fruits'],
+          selected: null,
+          duration: 1000,
+          'onUpdate:expanded': () => {},
+          'onUpdate:selected': () => {}
+        })
+
+        try {
+          if (collapsing) {
+            await wrapper.setProps({ expanded: [] })
+          }
+
+          // Keep the node key while its child container is removed.
+          await wrapper.setProps({
+            nodes: [{ id: 'fruits', label: 'Fruits', children: [] }]
+          })
+          await wrapper.setProps({ nodes: getNodes(), expanded: ['fruits'] })
+          await nextTick()
+          expect(
+            wrapper.get('.q-tree__node-collapsible').element.getAnimations()
+          ).toHaveLength(1)
+          await vi.runAllTimersAsync()
+
+          // Reversing an unfinished collapse returns to its initial state.
+          expect(wrapper.emitted('afterShow')).toStrictEqual(
+            collapsing ? void 0 : [[]]
+          )
+          expect(wrapper.emitted('afterHide')).toBeUndefined()
+          expect(getHeader(wrapper, 'Fruits').attributes('aria-expanded')).toBe(
+            'true'
+          )
+          expect(getLabels(wrapper)).toStrictEqual([
+            'Fruits',
+            'Apple',
+            'Banana',
+            'Bread'
+          ])
+          await getHeaderByLabel(wrapper, 'Apple').trigger('click')
+          expect(wrapper.emitted('update:selected').at(-1)).toStrictEqual([
+            'apple'
+          ])
+
+          await wrapper.setProps({ expanded: [] })
+          expect(
+            wrapper.get('.q-tree__node-collapsible').element.getAnimations()
+          ).toHaveLength(1)
+          await vi.runAllTimersAsync()
+          expect(getLabels(wrapper)).toStrictEqual(['Fruits', 'Bread'])
+          expect(getHeader(wrapper, 'Fruits').attributes('aria-expanded')).toBe(
+            'false'
+          )
+        } finally {
+          wrapper.unmount()
+          vi.useRealTimers()
+        }
+      }
+    )
+
+    test('keeps restored children collapsed when expansion is cleared', async () => {
+      vi.useFakeTimers()
+      const wrapper = mountTree({ expanded: ['fruits'], duration: 1000 })
+
+      try {
+        await wrapper.setProps({
+          nodes: [{ id: 'fruits', label: 'Fruits', children: [] }]
+        })
+        await wrapper.setProps({ nodes: getNodes(), expanded: [] })
+        await nextTick()
+        await vi.runAllTimersAsync()
+
+        expect(getHeader(wrapper, 'Fruits').attributes('aria-expanded')).toBe(
+          'false'
+        )
+        expect(getLabels(wrapper)).toStrictEqual(['Fruits', 'Bread'])
+      } finally {
+        wrapper.unmount()
+        vi.useRealTimers()
+      }
+    })
+
     test('renders a collapsed subtree only after its first expansion', async () => {
       // an instant toggle, so the collapse settles within the tick
       const wrapper = mountTree({ duration: 0 })

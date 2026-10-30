@@ -114,6 +114,12 @@ When a tree node has focus:
 - <kbd>Home</kbd> and <kbd>End</kbd> move focus to the first and last visible nodes.
 - <kbd>Enter</kbd> performs the node's default action; <kbd>Space</kbd> toggles its expansion — or its checkbox, on tickable nodes (when using a `tick-strategy`). Both do nothing on a disabled node.
 
+### Updating children
+
+Keep `node-key` values stable when replacing nodes. A node's children can be removed and restored while its key remains in the `expanded` model. The restored children follow the current expansion state, including updates during an expand/collapse transition.
+
+<DocExample title="Updating children" file="UpdatingChildren" />
+
 ### No connector lines
 
 <DocExample title="No connectors" file="NoConnectors" />
