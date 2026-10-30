@@ -2,6 +2,7 @@
   <div class="q-pa-md q-gutter-sm">
     <q-btn label="Remove and restore children" @click="refreshChildren" />
     <q-tree
+      aria-label="Tree with updating children"
       v-model:expanded="expanded"
       v-model:selected="selected"
       :nodes="nodes"

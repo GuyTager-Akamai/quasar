@@ -1522,6 +1522,7 @@ describe('[QTree API]', () => {
       'keeps restored children visible when already collapsing: %s',
       async collapsing => {
         vi.useFakeTimers()
+        const expandedLabels = ['Fruits', 'Apple', 'Banana', 'Bread']
         const wrapper = mountTree({
           expanded: ['fruits'],
           selected: null,
@@ -1544,6 +1545,7 @@ describe('[QTree API]', () => {
           expect(
             wrapper.get('.q-tree__node-collapsible').element.getAnimations()
           ).toHaveLength(1)
+          expect(getLabels(wrapper)).toStrictEqual(expandedLabels)
           await vi.runAllTimersAsync()
 
           // Reversing an unfinished collapse returns to its initial state.
@@ -1554,12 +1556,7 @@ describe('[QTree API]', () => {
           expect(getHeader(wrapper, 'Fruits').attributes('aria-expanded')).toBe(
             'true'
           )
-          expect(getLabels(wrapper)).toStrictEqual([
-            'Fruits',
-            'Apple',
-            'Banana',
-            'Bread'
-          ])
+          expect(getLabels(wrapper)).toStrictEqual(expandedLabels)
           await getHeaderByLabel(wrapper, 'Apple').trigger('click')
           expect(wrapper.emitted('update:selected').at(-1)).toStrictEqual([
             'apple'
